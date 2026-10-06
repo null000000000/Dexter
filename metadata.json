@@ -1,0 +1,6 @@
+{
+  "name": "Operation Dexter Execution System",
+  "description": "16-week personal operating system, calendar, and task execution engine for Operation Dexter (26 Sep 2026 - 15 Jan 2027).",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

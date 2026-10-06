@@ -1,0 +1,139 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny all access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Common security helpers
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-\\.]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // User settings root document
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow create, update: if isOwner(userId) &&
+        isValidId(userId) &&
+        incoming().userId == userId &&
+        incoming().startDate is string &&
+        incoming().startDate.size() <= 32 &&
+        incoming().isConfigured is bool;
+      allow delete: if false;
+
+      // Planned Task Execution Records
+      match /tasks/{taskId} {
+        allow get, list: if isOwner(userId);
+        allow create, update: if isOwner(userId) &&
+          isValidId(taskId) &&
+          incoming().userId == userId &&
+          incoming().id is string &&
+          incoming().date is string &&
+          incoming().status in ['not-started', 'in-progress', 'done', 'partial', 'blocked', 'deferred', 'cancelled'];
+        allow delete: if isOwner(userId);
+      }
+
+      // Daily Extra Tasks
+      match /extraTasks/{extraTaskId} {
+        allow get, list: if isOwner(userId);
+        allow create, update: if isOwner(userId) &&
+          isValidId(extraTaskId) &&
+          incoming().userId == userId &&
+          incoming().title is string &&
+          incoming().title.size() > 0 &&
+          incoming().title.size() <= 500 &&
+          incoming().date is string &&
+          incoming().completed is bool;
+        allow delete: if isOwner(userId);
+      }
+
+      // Daily Checks
+      match /dailyChecks/{checkDate} {
+        allow get, list: if isOwner(userId);
+        allow create, update: if isOwner(userId) &&
+          isValidId(checkDate) &&
+          incoming().userId == userId &&
+          incoming().date is string &&
+          incoming().cptsStatus in ['Done', 'Partial', 'Missed'] &&
+          incoming().secondaryStatus in ['Done', 'Partial', 'Missed'] &&
+          incoming().energyLevel is number;
+        allow delete: if isOwner(userId);
+      }
+
+      // Weekly Reviews
+      match /weeklyReviews/{weekNum} {
+        allow get, list: if isOwner(userId);
+        allow create, update: if isOwner(userId) &&
+          isValidId(weekNum) &&
+          incoming().userId == userId &&
+          incoming().weekNumber is number &&
+          incoming().isCompleted is bool;
+        allow delete: if isOwner(userId);
+      }
+
+      // Monthly Reviews
+      match /monthlyReviews/{monthNum} {
+        allow get, list: if isOwner(userId);
+        allow create, update: if isOwner(userId) &&
+          isValidId(monthNum) &&
+          incoming().userId == userId &&
+          incoming().monthNumber is number &&
+          incoming().isCompleted is bool;
+        allow delete: if isOwner(userId);
+      }
+
+      // Opportunity Firewall Logs
+      match /firewallLogs/{firewallId} {
+        allow get, list: if isOwner(userId);
+        allow create, update: if isOwner(userId) &&
+          isValidId(firewallId) &&
+          incoming().userId == userId &&
+          incoming().opportunityName is string &&
+          incoming().decision in ['Rejected', 'Postponed', 'Accepted (Rare)'];
+        allow delete: if isOwner(userId);
+      }
+
+      // Time Tracking Sessions (Clockify-inspired)
+      match /timeSessions/{sessionId} {
+        allow get, list: if isOwner(userId);
+        allow create, update: if isOwner(userId) &&
+          isValidId(sessionId) &&
+          incoming().userId == userId &&
+          incoming().startTime is string &&
+          incoming().totalElapsedSeconds is number &&
+          incoming().status in ['completed', 'running', 'paused', 'discarded'] &&
+          incoming().source in ['timer', 'manual'];
+        allow delete: if isOwner(userId);
+      }
+
+      // Active Running/Paused Timer Singleton State
+      match /activeTimer/{timerDoc} {
+        allow get, list: if isOwner(userId);
+        allow create, update: if isOwner(userId) &&
+          isValidId(timerDoc) &&
+          incoming().userId == userId &&
+          incoming().sessionId is string &&
+          incoming().status in ['running', 'paused'];
+        allow delete: if isOwner(userId);
+      }
+    }
+  }
+}

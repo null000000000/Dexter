@@ -1,0 +1,218 @@
+{
+  "entities": {
+    "userSettings": {
+      "title": "UserSettings",
+      "description": "User profile and Operation Dexter master configuration settings",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Firebase Auth UID" },
+        "startDate": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
+        "isConfigured": { "type": "boolean" },
+        "currentDate": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["userId", "startDate", "isConfigured"]
+    },
+    "taskRecord": {
+      "title": "TaskRecord",
+      "description": "Execution status and attached evidence for a planned Dexter task",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "date": { "type": "string" },
+        "status": { "type": "string", "enum": ["not-started", "in-progress", "done", "partial", "blocked", "deferred", "cancelled"] },
+        "evidenceUrl": { "type": "string" },
+        "evidenceNotes": { "type": "string" },
+        "userNotes": { "type": "string" },
+        "completedAt": { "type": "string" }
+      },
+      "required": ["id", "userId", "date", "status"]
+    },
+    "extraTaskRecord": {
+      "title": "ExtraTaskRecord",
+      "description": "Ad-hoc or incidental daily task for a specific calendar date",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "title": { "type": "string", "maxLength": 300 },
+        "date": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
+        "completed": { "type": "boolean" },
+        "priority": { "type": "string", "enum": ["P1 - High", "P2 - Normal", "P3 - Low"] },
+        "notes": { "type": "string", "maxLength": 1000 },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "userId", "title", "date", "completed"]
+    },
+    "dailyCheckRecord": {
+      "title": "DailyCheckRecord",
+      "description": "Daily 2-minute finish day review and check record",
+      "type": "object",
+      "properties": {
+        "date": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
+        "userId": { "type": "string" },
+        "dayNumber": { "type": "number" },
+        "cptsStatus": { "type": "string", "enum": ["Done", "Partial", "Missed"] },
+        "secondaryStatus": { "type": "string", "enum": ["Done", "Partial", "Missed"] },
+        "mainOutput": { "type": "string", "maxLength": 1000 },
+        "mainFriction": { "type": "string", "maxLength": 1000 },
+        "energyLevel": { "type": "number" },
+        "tomorrowFirstTask": { "type": "string", "maxLength": 1000 },
+        "timestamp": { "type": "string" },
+        "finishedAt": { "type": "string" }
+      },
+      "required": ["date", "userId", "cptsStatus", "secondaryStatus", "mainOutput", "energyLevel"]
+    },
+    "weeklyReviewRecord": {
+      "title": "WeeklyReviewRecord",
+      "description": "Weekly 6-step guided review and restructure audit log",
+      "type": "object",
+      "properties": {
+        "weekNumber": { "type": "number" },
+        "userId": { "type": "string" },
+        "startDate": { "type": "string" },
+        "endDate": { "type": "string" },
+        "kpiMovement": { "type": "string" },
+        "plannedVsActual": { "type": "string" },
+        "delayedTasks": { "type": "string" },
+        "friction": { "type": "string" },
+        "restructureDecisions": { "type": "string" },
+        "capacityIssue": { "type": "string" },
+        "nextWeekObjectives": { "type": "string" },
+        "completionScorePercent": { "type": "number" },
+        "isCompleted": { "type": "boolean" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["weekNumber", "userId", "isCompleted"]
+    },
+    "monthlyReviewRecord": {
+      "title": "MonthlyReviewRecord",
+      "description": "Monthly milestone audit and master plan comparison",
+      "type": "object",
+      "properties": {
+        "monthNumber": { "type": "number" },
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "kpiAssessment": { "type": "string" },
+        "cptsCumulative": { "type": "string" },
+        "ctfWriteupsCount": { "type": "string" },
+        "projectStatus": { "type": "string" },
+        "vulnexStatus": { "type": "string" },
+        "portfolioEvidence": { "type": "string" },
+        "brandOutput": { "type": "string" },
+        "customerPipeline": { "type": "string" },
+        "masterTargetComparison": { "type": "string" },
+        "isCompleted": { "type": "boolean" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["monthNumber", "userId", "isCompleted"]
+    },
+    "firewallLogRecord": {
+      "title": "FirewallLogRecord",
+      "description": "Opportunity-Cost Firewall intercepted request log",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "date": { "type": "string" },
+        "opportunityName": { "type": "string" },
+        "whatItOffers": { "type": "string" },
+        "whatItWouldConsume": { "type": "string" },
+        "sacrificedKpi": { "type": "string" },
+        "decision": { "type": "string", "enum": ["Rejected", "Postponed", "Accepted (Rare)"] },
+        "revisitDate": { "type": "string" },
+        "notes": { "type": "string" }
+      },
+      "required": ["id", "userId", "opportunityName", "decision"]
+    },
+    "timeSessionRecord": {
+      "title": "TimeSessionRecord",
+      "description": "Clockify-inspired recorded time session for task execution",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "taskId": { "type": "string" },
+        "taskTitle": { "type": "string", "maxLength": 500 },
+        "taskDate": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
+        "isExtraTask": { "type": "boolean" },
+        "kpiId": { "type": "string" },
+        "projectNumber": { "type": "number" },
+        "startTime": { "type": "string" },
+        "endTime": { "type": "string" },
+        "totalElapsedSeconds": { "type": "number" },
+        "status": { "type": "string", "enum": ["completed", "running", "paused", "discarded"] },
+        "source": { "type": "string", "enum": ["timer", "manual"] },
+        "pausedIntervals": { "type": "array" },
+        "notes": { "type": "string", "maxLength": 1000 },
+        "wasManuallyEdited": { "type": "boolean" },
+        "editReason": { "type": "string", "maxLength": 500 },
+        "isArchivedTask": { "type": "boolean" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "userId", "startTime", "totalElapsedSeconds", "status", "source"]
+    },
+    "activeTimerRecord": {
+      "title": "ActiveTimerRecord",
+      "description": "Singleton active timer state for the user ensuring single running timer across devices",
+      "type": "object",
+      "properties": {
+        "sessionId": { "type": "string" },
+        "userId": { "type": "string" },
+        "taskId": { "type": "string" },
+        "taskTitle": { "type": "string", "maxLength": 500 },
+        "taskDate": { "type": "string" },
+        "isExtraTask": { "type": "boolean" },
+        "kpiId": { "type": "string" },
+        "startTime": { "type": "string" },
+        "status": { "type": "string", "enum": ["running", "paused"] },
+        "pausedAt": { "type": "string" },
+        "accumulatedActiveSeconds": { "type": "number" },
+        "pausedIntervals": { "type": "array" },
+        "notes": { "type": "string", "maxLength": 1000 },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["sessionId", "userId", "startTime", "status"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "userSettings",
+      "description": "User profile settings, start date, and app state configuration"
+    },
+    "/users/{userId}/tasks/{taskId}": {
+      "schema": "taskRecord",
+      "description": "Task execution states, notes, and evidence references"
+    },
+    "/users/{userId}/extraTasks/{extraTaskId}": {
+      "schema": "extraTaskRecord",
+      "description": "Daily extra tasks and incidental checklist items"
+    },
+    "/users/{userId}/dailyChecks/{checkDate}": {
+      "schema": "dailyCheckRecord",
+      "description": "Daily finish day review submissions"
+    },
+    "/users/{userId}/weeklyReviews/{weekNumber}": {
+      "schema": "weeklyReviewRecord",
+      "description": "Weekly audit and capacity review logs"
+    },
+    "/users/{userId}/monthlyReviews/{monthNumber}": {
+      "schema": "monthlyReviewRecord",
+      "description": "Monthly comprehensive review audits"
+    },
+    "/users/{userId}/firewallLogs/{firewallId}": {
+      "schema": "firewallLogRecord",
+      "description": "Intercepted opportunity tradeoff records"
+    },
+    "/users/{userId}/timeSessions/{sessionId}": {
+      "schema": "timeSessionRecord",
+      "description": "Historical tracked and manual time entries"
+    },
+    "/users/{userId}/activeTimer/current": {
+      "schema": "activeTimerRecord",
+      "description": "Real-time active running or paused timer state singleton"
+    }
+  }
+}
