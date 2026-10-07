@@ -2,25 +2,13 @@ import React, { useState } from 'react';
 import { useDexter } from '../context/DexterContext';
 import { useAuth } from '../context/AuthContext';
 import {
-  CheckCircle2,
-  Calendar,
-  Layers,
-  Target,
-  FileText,
-  Clock,
-  Settings,
-  Timer,
-  ChevronDown,
-  Download,
-  Upload,
-  RefreshCw,
-  AlertTriangle,
+  Menu,
   Cloud,
   LogIn,
-  LogOut,
-  User as UserIcon
+  LogOut
 } from 'lucide-react';
 import { StartDateModal } from './StartDateModal';
+import { NavigationDrawer } from './NavigationDrawer';
 
 interface HeaderProps {
   currentTab: string;
@@ -32,9 +20,6 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, onTabChange }) => {
     currentDate,
     currentDayNumber,
     currentWeek,
-    startDate,
-    endDate,
-    setCurrentDate,
     cloudSyncStatus,
     syncError,
     triggerManualCloudSync
@@ -43,25 +28,26 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, onTabChange }) => {
   const { user, signInWithGoogle, signOut, loading: authLoading } = useAuth();
 
   const [showStartDateModal, setShowStartDateModal] = useState(false);
-
-  const navItems = [
-    { id: 'today', label: 'TODAY', icon: CheckCircle2 },
-    { id: 'week', label: 'WEEK', icon: Calendar },
-    { id: 'plan', label: 'PLAN', icon: Layers },
-    { id: 'analytics', label: 'TIME ANALYTICS', icon: Timer },
-    { id: 'kpis', label: 'KPIS & TASKS', icon: Target },
-    { id: 'deliverables', label: 'DELIVERABLES', icon: FileText },
-    { id: 'reviews', label: 'REVIEWS', icon: Clock },
-    { id: 'settings', label: 'SETTINGS & RECOVERY', icon: Settings }
-  ];
+  const [showDrawer, setShowDrawer] = useState(false);
 
   return (
     <>
       <header className="sticky top-0 z-40 w-full border-b border-neutral-800 bg-neutral-950/95 backdrop-blur-md">
         {/* Top Bar Contract: 3 zones */}
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6">
-          {/* Zone 1: Single text element wordmark */}
-          <div className="flex items-center gap-3 shrink-0">
+          {/* Zone 1: Sidebar Toggle Button + Wordmark */}
+          <div className="flex items-center gap-2.5 shrink-0">
+            {/* Sidebar Drawer Toggle Button */}
+            <button
+              onClick={() => setShowDrawer(true)}
+              className="flex items-center gap-1.5 rounded-lg border border-neutral-800 bg-neutral-900/90 px-2.5 py-1.5 text-xs text-neutral-300 hover:border-emerald-500/50 hover:bg-neutral-800 hover:text-emerald-400 font-mono transition shadow-sm group"
+              title="Open Navigation Menu (القائمة الجانبية)"
+              aria-label="Open Navigation Drawer"
+            >
+              <Menu className="h-4 w-4 text-emerald-400 group-hover:scale-105 transition-transform" />
+              <span className="hidden sm:inline font-bold">MENU</span>
+            </button>
+
             <button
               onClick={() => onTabChange('today')}
               className="group flex items-center gap-2 text-left focus-visible:outline-none"
@@ -80,27 +66,29 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, onTabChange }) => {
             </button>
           </div>
 
-          {/* Zone 2: Navigation Links (Clean, Low Cognitive Load) */}
-          <nav className="hidden lg:flex items-center gap-1 xl:gap-2 text-xs font-mono font-medium">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = currentTab === item.id;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => onTabChange(item.id)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition whitespace-nowrap ${
-                    isActive
-                      ? 'bg-neutral-800 text-emerald-400 font-bold'
-                      : 'text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900'
-                  }`}
-                >
-                  <Icon className="h-3.5 w-3.5" />
-                  <span>{item.label}</span>
-                </button>
-              );
-            })}
-          </nav>
+          {/* Zone 2: System Subtitle & Active Navigation Pill (Replaces horizontal row) */}
+          <div className="hidden md:flex items-center gap-2 font-mono text-xs text-neutral-400">
+            <span className="text-neutral-600">/</span>
+            <span className="text-emerald-400 font-bold uppercase tracking-wider">
+              {currentTab === 'today'
+                ? 'TODAY EXECUTION'
+                : currentTab === 'week'
+                ? 'WEEK SCHEDULE'
+                : currentTab === 'plan'
+                ? '16-WEEK ROADMAP'
+                : currentTab === 'analytics'
+                ? 'TIME ANALYTICS'
+                : currentTab === 'kpis'
+                ? 'KPIS & DATABASE'
+                : currentTab === 'deliverables'
+                ? 'EVIDENCE VAULT'
+                : currentTab === 'reviews'
+                ? 'GUIDED REVIEWS'
+                : currentTab === 'settings'
+                ? 'SETTINGS & FIREWALL'
+                : currentTab.toUpperCase()}
+            </span>
+          </div>
 
           {/* Zone 3: Active Day Status & Timeline Controls & Cloud Auth */}
           <div className="flex items-center gap-2 font-mono">
@@ -127,10 +115,10 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, onTabChange }) => {
                   <Cloud className="h-3 w-3 text-emerald-400" />
                   <span className="hidden sm:inline">
                     {cloudSyncStatus === 'synced'
-                      ? 'Cloud Synced'
+                      ? 'Synced'
                       : cloudSyncStatus === 'syncing'
                       ? 'Syncing'
-                      : 'Sync Warning'}
+                      : 'Warning'}
                   </span>
                 </button>
 
@@ -174,28 +162,6 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, onTabChange }) => {
             </button>
           </div>
         </div>
-
-        {/* Mobile Navigation Scrollbar */}
-        <div className="lg:hidden flex items-center overflow-x-auto border-t border-neutral-800/80 px-4 py-1.5 gap-1.5 text-xs font-mono no-scrollbar bg-neutral-950">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = currentTab === item.id;
-            return (
-              <button
-                key={item.id}
-                onClick={() => onTabChange(item.id)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg whitespace-nowrap shrink-0 transition ${
-                  isActive
-                    ? 'bg-neutral-800 text-emerald-400 font-bold'
-                    : 'text-neutral-400 hover:text-neutral-200'
-                }`}
-              >
-                <Icon className="h-3 w-3" />
-                <span>{item.label}</span>
-              </button>
-            );
-          })}
-        </div>
       </header>
 
       {/* Start Date Settings / Recalculation Modal */}
@@ -203,6 +169,14 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, onTabChange }) => {
         isOpen={showStartDateModal}
         isInitialSetup={false}
         onClose={() => setShowStartDateModal(false)}
+      />
+
+      {/* Side Navigation Drawer */}
+      <NavigationDrawer
+        isOpen={showDrawer}
+        onClose={() => setShowDrawer(false)}
+        currentTab={currentTab}
+        onTabChange={onTabChange}
       />
     </>
   );
